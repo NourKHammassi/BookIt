@@ -19,11 +19,11 @@ export async function GET(request: Request) {
     orderBy: { createdAt: "desc" },
   });
 
-  const result = properties.map((p) => ({
-    ...p,
+const result = properties.map((p: any) => ({
+      ...p,
     avgRating:
       p.reviews.length > 0
-        ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
+        ? p.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / p.reviews.length
         : null,
     reviewCount: p.reviews.length,
   }));
