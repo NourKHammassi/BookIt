@@ -12,9 +12,8 @@
   --color-text-muted: #6B7280;
   --color-border: #E5E7EB;
 
-  --font-heading: "Playfair Display", serif;
-  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
-}
+--font-heading: "Cormorant Garamond", serif;
+--font-body: "Outfit", system-ui, sans-serif;}
 
 body {
   margin: 0;

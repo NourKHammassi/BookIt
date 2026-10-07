@@ -75,7 +75,7 @@ export default function WhyBookIt() {
             >
               {f.icon}
             </div>
-            <h3 className="m-0 mb-2 text-lg font-semibold">{f.title}</h3>
+<h3 className="m-0 mb-2 text-lg font-semibold font-heading">{f.title}</h3>
             <p className="m-0 text-sm text-text-muted leading-relaxed">
               {f.description}
             </p>

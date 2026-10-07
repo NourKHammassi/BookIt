@@ -125,7 +125,7 @@ export default function FeaturedStays() {
               </div>
               <div className="p-5">
                 <div className="flex justify-between items-start">
-                  <h3 className="m-0 text-[17px] font-semibold text-text">
+                  <h3 className="m-0 text-[17px] font-semibold text-text font-heading">
                     {property.title}
                   </h3>
                   {property.avgRating && (

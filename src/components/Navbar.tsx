@@ -46,9 +46,7 @@ export default function Navbar() {
           Log in
         </Link>
         <Link
-          href="/login"
-          className="text-sm font-semibold text-white no-underline px-5 py-2.5 bg-blue rounded-lg hover:bg-navy transition-colors"
-        >
+          href="/login" className="text-sm font-semibold !text-white no-underline px-5 py-2.5 bg-blue rounded-lg hover:bg-navy transition-colors"        >
           Sign up
         </Link>
       </div>
