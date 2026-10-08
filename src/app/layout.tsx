@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "BookIt — Hotel & Apartment Booking in Tunisia",
@@ -22,7 +23,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body><Providers>
+        {children}
+      </Providers>
+      </body>
     </html>
   );
 }
