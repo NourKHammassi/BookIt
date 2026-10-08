@@ -1,6 +1,13 @@
+"use client";
+
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { useState } from "react";
 
 export default function Navbar() {
+  const { data: session } = useSession();
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <nav className="flex items-center justify-between px-16 py-5 bg-white border-b border-border">
       <Link href="/" className="flex items-center gap-2 no-underline">
@@ -38,18 +45,56 @@ export default function Navbar() {
         </span>
       </div>
 
-      <div className="flex items-center gap-3">
-        <Link
-          href="/login"
-          className="text-sm font-semibold text-blue no-underline px-5 py-2.5 border-[1.5px] border-blue rounded-lg hover:bg-blue hover:text-white transition-colors"
-        >
-          Log in
-        </Link>
-        <Link
-          href="/login" className="text-sm font-semibold !text-white no-underline px-5 py-2.5 bg-blue rounded-lg hover:bg-navy transition-colors"        >
-          Sign up
-        </Link>
-      </div>
+      {session?.user ? (
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="flex items-center gap-3 cursor-pointer group"
+          >
+            <span className="text-[15px] font-medium text-text-muted group-hover:text-navy transition-colors">
+              {session.user.name || "User"}
+            </span>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue to-navy flex items-center justify-center text-white text-[13px] font-bold tracking-wide ring-2 ring-white shadow-sm">
+              {session.user.name?.charAt(0).toUpperCase() || "U"}
+            </div>
+          </button>
+
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-0 mt-3 w-52 bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.1)] border border-border/60 z-50 overflow-hidden">
+                <div className="px-5 py-4">
+                  <p className="text-[13px] font-semibold text-navy truncate">{session.user.name}</p>
+                  <p className="text-[12px] text-text-muted truncate mt-0.5">{session.user.email}</p>
+                </div>
+                <div className="border-t border-border/60">
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="w-full text-left px-5 py-3 text-[13px] font-medium text-text-muted hover:text-red hover:bg-cream cursor-pointer transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center gap-3">
+          <Link
+            href="/login"
+            className="text-sm font-semibold text-blue no-underline px-5 py-2.5 border-[1.5px] border-blue rounded-lg hover:bg-blue hover:text-white transition-colors"
+          >
+            Log in
+          </Link>
+          <Link
+            href="/register"
+            className="text-sm font-semibold !text-white no-underline px-5 py-2.5 bg-blue rounded-lg hover:bg-navy transition-colors"
+          >
+            Sign up
+          </Link>
+        </div>
+      )}
     </nav>
   );
 }
