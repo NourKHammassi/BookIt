@@ -30,7 +30,7 @@ export default async function PropertyPage({ params }: Props) {
   const avgRating =
     property.reviews.length > 0
       ? property.reviews.reduce((sum, r) => sum + r.rating, 0) /
-        property.reviews.length
+      property.reviews.length
       : null;
 
   return (
@@ -144,8 +144,8 @@ export default async function PropertyPage({ params }: Props) {
           <PropertyBookingCard
             propertyId={property.id}
             pricePerNight={property.pricePerNight}
-            avgRating={avgRating}
-            reviewCount={property.reviews.length}
+            maxGuests={property.maxGuests}
+            title={property.title}
           />
         </div>
       </div>

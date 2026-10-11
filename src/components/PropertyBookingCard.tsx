@@ -1,134 +1,249 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface Props {
   propertyId: string;
   pricePerNight: number;
-  avgRating: number | null;
-  reviewCount: number;
+  maxGuests: number;
+  title: string;
 }
 
-export default function PropertyBookingCard({
-  propertyId,
-  pricePerNight,
-  avgRating,
-  reviewCount,
-}: Props) {
+export default function PropertyBookingCard({ propertyId, pricePerNight, maxGuests, title }: Props) {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const nights =
     checkIn && checkOut
-      ? Math.max(
-          0,
-          Math.ceil(
-            (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
+      ? Math.ceil(
+          (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
+            (1000 * 60 * 60 * 24)
         )
       : 0;
 
-  const total = nights * pricePerNight;
+  const totalPrice = nights > 0 ? nights * pricePerNight : 0;
+
+  function handleReserveClick() {
+    if (!session) {
+      router.push("/login");
+      return;
+    }
+    if (!checkIn || !checkOut) {
+      setError("Select check-in and check-out dates");
+      return;
+    }
+    if (nights <= 0) {
+      setError("Check-out must be after check-in");
+      return;
+    }
+    setError("");
+    setShowConfirm(true);
+  }
+
+  async function handleConfirm() {
+    setShowConfirm(false);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId, checkIn, checkOut, guests }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error);
+        setLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+      setLoading(false);
+    } catch {
+      setError("Something went wrong");
+      setLoading(false);
+    }
+  }
+
+  function formatDate(val: string) {
+    return new Date(val).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  if (success) {
+    return (
+      <div className="sticky top-8 w-[380px] border border-border rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] bg-white">
+        <div className="text-center">
+          <div className="w-14 h-14 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          </div>
+          <h3 className="font-heading text-xl font-bold text-navy mb-2">Booking confirmed!</h3>
+          <p className="text-sm text-text-muted mb-6">
+            {nights} night{nights > 1 ? "s" : ""} · {totalPrice} TND total
+          </p>
+          <button
+            onClick={() => router.push("/bookings")}
+            className="w-full px-6 py-3 bg-blue text-white rounded-xl text-sm font-semibold cursor-pointer hover:bg-navy transition-colors"
+          >
+            View my bookings
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-[380px] shrink-0 sticky top-10 self-start">
-      <div className="border border-border rounded-2xl p-6 shadow-[0_2px_16px_rgba(0,0,0,0.08)]">
-        {/* Price */}
-        <div className="flex items-baseline justify-between mb-6">
-          <div>
-            <span className="text-2xl font-bold text-navy">
-              {pricePerNight} TND
-            </span>
-            <span className="text-sm text-text-muted ml-1">/ night</span>
+    <>
+      <div className="sticky top-8 w-[380px] border border-border rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] bg-white">
+        <div className="flex items-baseline gap-1.5 mb-6">
+          <span className="text-2xl font-bold text-navy">{pricePerNight} TND</span>
+          <span className="text-sm text-text-muted">/ night</span>
+        </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red/10 border border-red/20 rounded-xl text-red text-xs font-medium">
+            {error}
           </div>
-          {avgRating && (
-            <div className="flex items-center gap-1 text-sm">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="#C4503D"
-                stroke="#C4503D"
-                strokeWidth="1"
-              >
-                <polygon points="12 2 15 9 22 9 17 14 18.5 21 12 17 5.5 21 7 14 2 9 9 9" />
-              </svg>
-              <span className="font-semibold text-text">
-                {avgRating.toFixed(1)}
-              </span>
-              <span className="text-text-muted">
-                ({reviewCount})
-              </span>
+        )}
+
+        <div className="border border-border rounded-xl overflow-hidden mb-4">
+          <div className="grid grid-cols-2 divide-x divide-border">
+            <div className="p-3">
+              <label className="block text-[10px] font-semibold uppercase tracking-[1px] text-text-muted mb-1">
+                Check-in
+              </label>
+              <input
+                type="date"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+                className="w-full text-sm text-text outline-none"
+              />
             </div>
-          )}
-        </div>
-
-        {/* Date inputs */}
-        <div className="grid grid-cols-2 border border-border rounded-xl overflow-hidden mb-3">
-          <div className="p-3 border-r border-border">
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">
-              Check-in
-            </label>
-            <input
-              type="date"
-              value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
-              className="w-full border-none outline-none text-sm text-text bg-transparent"
-            />
+            <div className="p-3">
+              <label className="block text-[10px] font-semibold uppercase tracking-[1px] text-text-muted mb-1">
+                Checkout
+              </label>
+              <input
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+                min={checkIn || new Date().toISOString().split("T")[0]}
+                className="w-full text-sm text-text outline-none"
+              />
+            </div>
           </div>
-          <div className="p-3">
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">
-              Checkout
+          <div className="border-t border-border p-3">
+            <label className="block text-[10px] font-semibold uppercase tracking-[1px] text-text-muted mb-1">
+              Guests
             </label>
-            <input
-              type="date"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-              className="w-full border-none outline-none text-sm text-text bg-transparent"
-            />
+            <select
+              value={guests}
+              onChange={(e) => setGuests(Number(e.target.value))}
+              className="w-full text-sm text-text outline-none bg-white"
+            >
+              {Array.from({ length: maxGuests }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1} guest{i > 0 ? "s" : ""}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        <div className="border border-border rounded-xl p-3 mb-4">
-          <label className="block text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">
-            Guests
-          </label>
-          <select
-            value={guests}
-            onChange={(e) => setGuests(Number(e.target.value))}
-            className="w-full border-none outline-none text-sm text-text bg-transparent"
-          >
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <option key={n} value={n}>
-                {n} guest{n > 1 ? "s" : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Reserve button */}
-        <button className="w-full py-3.5 bg-red text-white border-none rounded-xl text-base font-semibold cursor-pointer font-body hover:bg-red/90 transition-colors">
-          Reserve
+        <button
+          onClick={handleReserveClick}
+          disabled={loading}
+          className="w-full py-3.5 bg-red text-white rounded-xl text-[15px] font-semibold cursor-pointer hover:bg-red/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? "Reserving..." : "Reserve"}
         </button>
 
-        {/* Price breakdown */}
         {nights > 0 && (
-          <div className="mt-4 pt-4 border-t border-border">
-            <div className="flex justify-between text-sm text-text mb-2">
-              <span>
-                {pricePerNight} TND × {nights} night{nights > 1 ? "s" : ""}
-              </span>
-              <span>{total} TND</span>
+          <div className="mt-5 flex flex-col gap-2 text-sm">
+            <div className="flex justify-between text-text-muted">
+              <span>{pricePerNight} TND × {nights} night{nights > 1 ? "s" : ""}</span>
+              <span>{totalPrice} TND</span>
             </div>
-            <div className="flex justify-between text-base font-bold text-navy pt-3 border-t border-border">
+            <div className="border-t border-border pt-2 flex justify-between font-semibold text-navy">
               <span>Total</span>
-              <span>{total} TND</span>
+              <span>{totalPrice} TND</span>
             </div>
           </div>
         )}
       </div>
-    </div>
+
+      {/* Confirmation modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-navy/40 backdrop-blur-sm" onClick={() => setShowConfirm(false)} />
+          <div className="relative bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl mx-4">
+            <h3 className="font-heading text-2xl font-bold text-navy mb-6">Confirm your booking</h3>
+
+            <div className="flex flex-col gap-4 mb-8">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-semibold uppercase tracking-[1px] text-text-muted">Property</span>
+                <span className="text-[15px] text-navy font-medium">{title}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-[1px] text-text-muted">Check-in</span>
+                  <span className="text-[15px] text-navy">{formatDate(checkIn)}</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-[1px] text-text-muted">Checkout</span>
+                  <span className="text-[15px] text-navy">{formatDate(checkOut)}</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-[1px] text-text-muted">Guests</span>
+                  <span className="text-[15px] text-navy">{guests} guest{guests > 1 ? "s" : ""}</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-[1px] text-text-muted">Duration</span>
+                  <span className="text-[15px] text-navy">{nights} night{nights > 1 ? "s" : ""}</span>
+                </div>
+              </div>
+              <div className="border-t border-border pt-4 flex justify-between">
+                <span className="text-[15px] font-semibold text-navy">Total</span>
+                <span className="text-xl font-bold text-navy">{totalPrice} TND</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 py-3 border-[1.5px] border-border rounded-xl text-sm font-semibold text-text-muted cursor-pointer hover:border-navy hover:text-navy transition-colors"
+              >
+                Go back
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="flex-1 py-3 bg-blue text-white rounded-xl text-sm font-semibold cursor-pointer hover:bg-navy transition-colors"
+              >
+                Confirm booking
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

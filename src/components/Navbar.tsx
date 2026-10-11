@@ -68,6 +68,13 @@ export default function Navbar() {
                   <p className="text-[12px] text-text-muted truncate mt-0.5">{session.user.email}</p>
                 </div>
                 <div className="border-t border-border/60">
+                  <Link
+                    href="/bookings"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-5 py-3 text-[13px] font-medium text-text-muted no-underline hover:text-blue hover:bg-cream transition-colors"
+                  >
+                    My bookings
+                  </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="w-full text-left px-5 py-3 text-[13px] font-medium text-text-muted hover:text-red hover:bg-cream cursor-pointer transition-colors"
