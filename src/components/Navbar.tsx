@@ -68,6 +68,15 @@ export default function Navbar() {
                   <p className="text-[12px] text-text-muted truncate mt-0.5">{session.user.email}</p>
                 </div>
                 <div className="border-t border-border/60">
+                  {(session?.user as any)?.role === "ADMIN" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-5 py-3 text-[13px] font-medium text-text-muted no-underline hover:text-blue hover:bg-cream transition-colors"
+                    >
+                      Admin panel
+                    </Link>
+                  )}
                   <Link
                     href="/bookings"
                     onClick={() => setMenuOpen(false)}
