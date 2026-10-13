@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 
 interface Props {
   images: string[];
@@ -14,11 +13,10 @@ function GalleryImage({ src, alt }: { src: string; alt: string }) {
   if (failed) return null;
 
   return (
-    <Image
+    <img
       src={src}
       alt={alt}
-      fill
-      className="object-cover"
+      className="w-full h-full object-cover"
       onError={() => setFailed(true)}
     />
   );
@@ -33,7 +31,7 @@ export default function PropertyGallery({ images, title }: Props) {
 
   if (images.length === 1) {
     return (
-      <div className="h-[420px] rounded-2xl overflow-hidden bg-gradient-to-br from-blue to-navy relative">
+      <div className="h-[420px] rounded-2xl overflow-hidden bg-gradient-to-br from-blue to-navy">
         <GalleryImage src={images[0]} alt={title} />
       </div>
     );
@@ -41,13 +39,13 @@ export default function PropertyGallery({ images, title }: Props) {
 
   return (
     <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[420px] rounded-2xl overflow-hidden">
-      <div className="col-span-2 row-span-2 relative bg-gradient-to-br from-blue to-navy">
+      <div className="col-span-2 row-span-2 bg-gradient-to-br from-blue to-navy">
         <GalleryImage src={images[0]} alt={title} />
       </div>
       {images.slice(1, 5).map((img, i) => (
         <div
           key={i}
-          className="relative bg-gradient-to-br from-blue to-navy"
+          className="bg-gradient-to-br from-blue to-navy"
         >
           <GalleryImage src={img} alt={`${title} ${i + 2}`} />
         </div>

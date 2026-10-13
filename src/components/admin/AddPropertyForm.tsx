@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import ImageUploader from "../ImageUploader";
 
 export default function AddPropertyForm({
   onClose,
@@ -10,9 +10,9 @@ export default function AddPropertyForm({
   onClose: () => void;
   onSuccess: (property: any) => void;
 }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [images, setImages] = useState<string[]>([]);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -43,10 +43,10 @@ export default function AddPropertyForm({
       const res = await fetch("/api/admin/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, images }),
       });
 
-            if (res.ok) {
+      if (res.ok) {
         const newProp = await res.json();
         onSuccess({
           id: newProp.id,
@@ -94,6 +94,11 @@ export default function AddPropertyForm({
               {error}
             </p>
           )}
+
+          <div>
+            <label className={labelClass}>Photos</label>
+            <ImageUploader images={images} onChange={setImages} max={5} />
+          </div>
 
           <div>
             <label className={labelClass}>Title *</label>
