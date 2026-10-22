@@ -37,12 +37,18 @@ export default function Navbar() {
         >
           Explore
         </Link>
-        <span className="text-[15px] font-medium text-text-muted cursor-pointer hover:text-blue">
+        <Link
+          href="/about"
+          className="text-[15px] font-medium no-underline text-text-muted hover:text-blue"
+        >
           About
-        </span>
-        <span className="text-[15px] font-medium text-text-muted cursor-pointer hover:text-blue">
+        </Link>
+        <Link
+          href="/contact"
+          className="text-[15px] font-medium no-underline text-text-muted hover:text-blue"
+        >
           Contact
-        </span>
+        </Link>
       </div>
 
       {session?.user ? (
@@ -77,6 +83,13 @@ export default function Navbar() {
                       Admin panel
                     </Link>
                   )}
+                  <Link
+                    href="/favorites"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-5 py-3 text-[13px] font-medium text-text-muted no-underline hover:text-blue hover:bg-cream transition-colors"
+                  >
+                    My favorites
+                  </Link>
                   <Link
                     href="/bookings"
                     onClick={() => setMenuOpen(false)}

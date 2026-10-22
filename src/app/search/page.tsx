@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import HeartButton from "@/components/HeartButton";
 
 interface Property {
   id: string;
@@ -37,11 +39,12 @@ function StarIcon() {
 }
 
 export default function SearchPage() {
+  const { data: session } = useSession();
   const searchParams = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filter state
   const [location, setLocation] = useState(
     searchParams.get("location") || ""
   );
@@ -76,6 +79,15 @@ export default function SearchPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (session?.user) {
+      fetch("/api/favorites?idsOnly=true")
+        .then((res) => res.json())
+        .then((data) => setFavoriteIds(data.ids || []))
+        .catch(() => {});
+    }
+  }, [session]);
+
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     fetchProperties();
@@ -102,7 +114,6 @@ export default function SearchPage() {
       <Navbar />
 
       <div className="px-16 py-10 flex gap-10 min-h-screen">
-        {/* Sidebar filters */}
         <aside className="w-72 shrink-0">
           <form onSubmit={handleSearch} className="sticky top-10">
             <h2 className="font-heading text-2xl font-semibold text-navy mb-6">
@@ -195,13 +206,10 @@ export default function SearchPage() {
           </form>
         </aside>
 
-        {/* Results */}
         <main className="flex-1">
           <div className="flex items-baseline justify-between mb-8">
             <h1 className="font-heading text-3xl font-semibold text-navy">
-              {location
-                ? `Stays in ${location}`
-                : "All stays"}
+              {location ? `Stays in ${location}` : "All stays"}
             </h1>
             {!loading && (
               <span className="text-sm text-text-muted">
@@ -272,6 +280,7 @@ export default function SearchPage() {
                         }}
                       />
                     )}
+                    <HeartButton propertyId={property.id} favoriteIds={favoriteIds} />
                     {property.featured && (
                       <div className="absolute top-3 left-3 bg-yellow rounded-full px-2.5 py-1 text-xs font-semibold text-white">
                         Featured

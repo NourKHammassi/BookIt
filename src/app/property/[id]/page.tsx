@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import PropertyGallery from "@/components/PropertyGallery";
 import PropertyBookingCard from "@/components/PropertyBookingCard";
 import PropertyReviews from "@/components/PropertyReviews";
+import PropertyFavorite from "@/components/PropertyFavorite";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -30,7 +31,7 @@ export default async function PropertyPage({ params }: Props) {
   const avgRating =
     property.reviews.length > 0
       ? property.reviews.reduce((sum, r) => sum + r.rating, 0) /
-      property.reviews.length
+        property.reviews.length
       : null;
 
   return (
@@ -38,43 +39,44 @@ export default async function PropertyPage({ params }: Props) {
       <Navbar />
 
       <div className="px-16 py-10">
-        {/* Title row */}
-        <div className="mb-6">
-          <h1 className="m-0 font-heading text-4xl font-bold text-navy">
-            {property.title}
-          </h1>
-          <div className="flex items-center gap-3 mt-2 text-sm text-text-muted">
-            {avgRating && (
-              <span className="flex items-center gap-1">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="#C4503D"
-                  stroke="#C4503D"
-                  strokeWidth="1"
-                >
-                  <polygon points="12 2 15 9 22 9 17 14 18.5 21 12 17 5.5 21 7 14 2 9 9 9" />
-                </svg>
-                <span className="font-semibold text-text">
-                  {avgRating.toFixed(1)}
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h1 className="m-0 font-heading text-4xl font-bold text-navy">
+              {property.title}
+            </h1>
+            <div className="flex items-center gap-3 mt-2 text-sm text-text-muted">
+              {avgRating && (
+                <span className="flex items-center gap-1">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="#C4503D"
+                    stroke="#C4503D"
+                    strokeWidth="1"
+                  >
+                    <polygon points="12 2 15 9 22 9 17 14 18.5 21 12 17 5.5 21 7 14 2 9 9 9" />
+                  </svg>
+                  <span className="font-semibold text-text">
+                    {avgRating.toFixed(1)}
+                  </span>
+                  <span>
+                    ({property.reviews.length} review
+                    {property.reviews.length !== 1 ? "s" : ""})
+                  </span>
                 </span>
-                <span>({property.reviews.length} review{property.reviews.length !== 1 ? "s" : ""})</span>
-              </span>
-            )}
-            <span>·</span>
-            <span>{property.city}, Tunisia</span>
+              )}
+              <span>·</span>
+              <span>{property.city}, Tunisia</span>
+            </div>
           </div>
+          <PropertyFavorite propertyId={property.id} />
         </div>
 
-        {/* Gallery */}
         <PropertyGallery images={property.images} title={property.title} />
 
-        {/* Content + Booking sidebar */}
         <div className="flex gap-12 mt-10">
-          {/* Left: details */}
           <div className="flex-1">
-            {/* Host info */}
             <div className="flex items-center gap-4 pb-8 border-b border-border">
               <div className="w-12 h-12 rounded-full bg-blue/10 flex items-center justify-center text-blue font-semibold text-lg">
                 {property.owner.name?.[0] || "H"}
@@ -84,12 +86,14 @@ export default async function PropertyPage({ params }: Props) {
                   Hosted by {property.owner.name || "Host"}
                 </p>
                 <p className="m-0 text-sm text-text-muted mt-0.5">
-                  {property.maxGuests} guest{property.maxGuests > 1 ? "s" : ""} · {property.bedrooms} bedroom{property.bedrooms > 1 ? "s" : ""} · {property.bathrooms} bathroom{property.bathrooms > 1 ? "s" : ""}
+                  {property.maxGuests} guest{property.maxGuests > 1 ? "s" : ""}{" "}
+                  · {property.bedrooms} bedroom
+                  {property.bedrooms > 1 ? "s" : ""} · {property.bathrooms}{" "}
+                  bathroom{property.bathrooms > 1 ? "s" : ""}
                 </p>
               </div>
             </div>
 
-            {/* Description */}
             <div className="py-8 border-b border-border">
               <h2 className="m-0 mb-4 font-heading text-2xl font-semibold text-navy">
                 About this place
@@ -99,7 +103,6 @@ export default async function PropertyPage({ params }: Props) {
               </p>
             </div>
 
-            {/* Amenities */}
             {property.amenities.length > 0 && (
               <div className="py-8 border-b border-border">
                 <h2 className="m-0 mb-4 font-heading text-2xl font-semibold text-navy">
@@ -129,7 +132,6 @@ export default async function PropertyPage({ params }: Props) {
               </div>
             )}
 
-            {/* Reviews */}
             <PropertyReviews
               propertyId={property.id}
               initialReviews={property.reviews.map((r) => ({
@@ -140,7 +142,6 @@ export default async function PropertyPage({ params }: Props) {
             />
           </div>
 
-          {/* Right: Booking card */}
           <PropertyBookingCard
             propertyId={property.id}
             pricePerNight={property.pricePerNight}

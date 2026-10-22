@@ -24,6 +24,7 @@ model User {
   properties Property[]
   bookings   Booking[]
   reviews    Review[]
+  favorites  Favorite[]
 }
 
 model Account {
@@ -93,6 +94,7 @@ model Property {
   amenities PropertyAmenity[]
   bookings  Booking[]
   reviews   Review[]
+  favorites Favorite[]
 }
 
 model Amenity {
@@ -145,6 +147,18 @@ model Review {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   propertyId String
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String
+  propertyId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@unique([userId, propertyId])
 }

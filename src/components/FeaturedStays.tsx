@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import HeartButton from "./HeartButton";
 
 interface Property {
   id: string;
@@ -32,7 +34,9 @@ function StarIcon() {
 }
 
 export default function FeaturedStays() {
+  const { data: session } = useSession();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,6 +48,15 @@ export default function FeaturedStays() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetch("/api/favorites?idsOnly=true")
+        .then((res) => res.json())
+        .then((data) => setFavoriteIds(data.ids || []))
+        .catch(() => {});
+    }
+  }, [session]);
 
   return (
     <section className="px-16 pt-20 pb-10">
@@ -117,6 +130,7 @@ export default function FeaturedStays() {
                     }}
                   />
                 )}
+                <HeartButton propertyId={property.id} favoriteIds={favoriteIds} />
                 {property.featured && (
                   <div className="absolute top-4 left-4 bg-yellow rounded-full px-3 py-1 text-xs font-semibold text-white">
                     Featured
