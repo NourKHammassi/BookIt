@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AddPropertyForm from "./AddPropertyForm";
+import EditPropertyForm from "./EditPropertyForm";
 
 type Property = {
   id: string;
@@ -22,6 +23,8 @@ export default function PropertyManager({
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [editData, setEditData] = useState<any | null>(null);
+  const [loadingEdit, setLoadingEdit] = useState<string | null>(null);
   const router = useRouter();
 
   async function handleDelete(id: string) {
@@ -42,9 +45,23 @@ export default function PropertyManager({
     }
   }
 
+  async function handleEdit(id: string) {
+    setLoadingEdit(id);
+    try {
+      const res = await fetch(`/api/admin/properties/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setEditData(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingEdit(null);
+    }
+  }
+
   return (
     <>
-      {/* Add Button */}
       <div className="flex justify-end mb-5">
         <button
           onClick={() => setShowAdd(true)}
@@ -54,18 +71,40 @@ export default function PropertyManager({
         </button>
       </div>
 
-      {/* Add Form Modal */}
-{showAdd && (
-  <AddPropertyForm
-    onClose={() => setShowAdd(false)}
-    onSuccess={(newProp) => {
-      setProperties((prev) => [newProp, ...prev]);
-      setShowAdd(false);
-      router.refresh();
-    }}
-  />
-)}
-      {/* Table */}
+      {showAdd && (
+        <AddPropertyForm
+          onClose={() => setShowAdd(false)}
+          onSuccess={(newProp) => {
+            setProperties((prev) => [newProp, ...prev]);
+            setShowAdd(false);
+            router.refresh();
+          }}
+        />
+      )}
+
+      {editData && (
+        <EditPropertyForm
+          property={editData}
+          onClose={() => setEditData(null)}
+          onSuccess={(updated) => {
+            setProperties((prev) =>
+              prev.map((p) =>
+                p.id === updated.id
+                  ? {
+                      ...p,
+                      title: updated.title,
+                      location: `${updated.city}, ${updated.country}`,
+                      pricePerNight: updated.pricePerNight,
+                    }
+                  : p
+              )
+            );
+            setEditData(null);
+            router.refresh();
+          }}
+        />
+      )}
+
       <div className="bg-white rounded-2xl border border-[#1A3654]/[0.04] overflow-hidden">
         <table className="w-full">
           <thead>
@@ -107,7 +146,7 @@ export default function PropertyManager({
                   {property.location}
                 </td>
                 <td className="px-6 py-4 text-[13px] font-semibold text-[#1A3654] font-body text-right">
-                  ${property.pricePerNight}
+                  {property.pricePerNight} TND
                 </td>
                 <td className="px-6 py-4 text-[13px] text-[#1A3654]/50 font-body text-right">
                   {property.bookingsCount}
@@ -130,12 +169,21 @@ export default function PropertyManager({
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => setConfirmId(property.id)}
-                      className="text-[11px] font-semibold font-body text-[#C4503D]/40 hover:text-[#C4503D] cursor-pointer transition-colors"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex items-center gap-3 justify-end">
+                      <button
+                        onClick={() => handleEdit(property.id)}
+                        disabled={loadingEdit === property.id}
+                        className="text-[11px] font-semibold font-body text-[#2B5EA7]/50 hover:text-[#2B5EA7] cursor-pointer transition-colors disabled:opacity-50"
+                      >
+                        {loadingEdit === property.id ? "..." : "Edit"}
+                      </button>
+                      <button
+                        onClick={() => setConfirmId(property.id)}
+                        className="text-[11px] font-semibold font-body text-[#C4503D]/40 hover:text-[#C4503D] cursor-pointer transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>
