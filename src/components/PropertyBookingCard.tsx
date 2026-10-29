@@ -19,7 +19,6 @@ export default function PropertyBookingCard({ propertyId, pricePerNight, maxGues
   const [guests, setGuests] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const nights =
@@ -49,27 +48,36 @@ export default function PropertyBookingCard({ propertyId, pricePerNight, maxGues
     setShowConfirm(true);
   }
 
-  async function handleConfirm() {
+  async function handlePayment() {
     setShowConfirm(false);
     setLoading(true);
+    setError("");
 
     try {
-      const res = await fetch("/api/bookings", {
+      const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertyId, checkIn, checkOut, guests }),
+        body: JSON.stringify({
+          propertyId,
+          title,
+          checkIn,
+          checkOut,
+          guests,
+          nights,
+          totalPrice,
+          pricePerNight,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error);
+        setError(data.error || "Failed to start checkout");
         setLoading(false);
         return;
       }
 
-      setSuccess(true);
-      setLoading(false);
+      window.location.href = data.url;
     } catch {
       setError("Something went wrong");
       setLoading(false);
@@ -84,33 +92,9 @@ export default function PropertyBookingCard({ propertyId, pricePerNight, maxGues
     });
   }
 
-  if (success) {
-    return (
-      <div className="sticky top-8 w-[380px] border border-border rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] bg-white">
-        <div className="text-center">
-          <div className="w-14 h-14 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
-          </div>
-          <h3 className="font-heading text-xl font-bold text-navy mb-2">Booking confirmed!</h3>
-          <p className="text-sm text-text-muted mb-6">
-            {nights} night{nights > 1 ? "s" : ""} · {totalPrice} TND total
-          </p>
-          <button
-            onClick={() => router.push("/bookings")}
-            className="w-full px-6 py-3 bg-blue text-white rounded-xl text-sm font-semibold cursor-pointer hover:bg-navy transition-colors"
-          >
-            View my bookings
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="sticky top-8 w-[380px] border border-border rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] bg-white">
+      <div className="sticky top-8 w-full lg:w-[380px] border border-border rounded-2xl p-6 md:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] bg-white">
         <div className="flex items-baseline gap-1.5 mb-6">
           <span className="text-2xl font-bold text-navy">{pricePerNight} TND</span>
           <span className="text-sm text-text-muted">/ night</span>
@@ -172,7 +156,7 @@ export default function PropertyBookingCard({ propertyId, pricePerNight, maxGues
           disabled={loading}
           className="w-full py-3.5 bg-red text-white rounded-xl text-[15px] font-semibold cursor-pointer hover:bg-red/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {loading ? "Reserving..." : "Reserve"}
+          {loading ? "Redirecting to payment..." : "Reserve"}
         </button>
 
         {nights > 0 && (
@@ -187,13 +171,21 @@ export default function PropertyBookingCard({ propertyId, pricePerNight, maxGues
             </div>
           </div>
         )}
+
+        <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-text-muted">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+          Secure payment via Stripe
+        </div>
       </div>
 
       {/* Confirmation modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-navy/40 backdrop-blur-sm" onClick={() => setShowConfirm(false)} />
-          <div className="relative bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl mx-4">
+          <div className="relative bg-white rounded-2xl p-6 md:p-8 w-full max-w-md shadow-2xl mx-4">
             <h3 className="font-heading text-2xl font-bold text-navy mb-6">Confirm your booking</h3>
 
             <div className="flex flex-col gap-4 mb-8">
@@ -235,10 +227,14 @@ export default function PropertyBookingCard({ propertyId, pricePerNight, maxGues
                 Go back
               </button>
               <button
-                onClick={handleConfirm}
-                className="flex-1 py-3 bg-blue text-white rounded-xl text-sm font-semibold cursor-pointer hover:bg-navy transition-colors"
+                onClick={handlePayment}
+                className="flex-1 py-3 bg-blue text-white rounded-xl text-sm font-semibold cursor-pointer hover:bg-navy transition-colors flex items-center justify-center gap-2"
               >
-                Confirm booking
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <rect x="1" y="4" width="22" height="16" rx="2" />
+                  <line x1="1" y1="10" x2="23" y2="10" />
+                </svg>
+                Pay with Stripe
               </button>
             </div>
           </div>
