@@ -22,6 +22,8 @@ export async function POST(request: Request) {
       bedrooms,
       bathrooms,
       images,
+      latitude,
+      longitude,
     } = body;
 
     if (!title || !city || !country || !pricePerNight) {
@@ -43,6 +45,8 @@ export async function POST(request: Request) {
         bedrooms: parseInt(bedrooms) || 1,
         bathrooms: parseInt(bathrooms) || 1,
         images: images || [],
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
         ownerId: (session.user as any).id,
       },
     });

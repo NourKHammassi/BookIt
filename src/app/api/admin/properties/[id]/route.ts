@@ -52,6 +52,8 @@ export async function PUT(
         bedrooms: parseInt(body.bedrooms),
         bathrooms: parseInt(body.bathrooms),
         images: body.images || [],
+        latitude: body.latitude ? parseFloat(body.latitude) : null,
+        longitude: body.longitude ? parseFloat(body.longitude) : null,
       },
     });
 

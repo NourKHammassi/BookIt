@@ -23,6 +23,8 @@ export default function AddPropertyForm({
     maxGuests: "4",
     bedrooms: "1",
     bathrooms: "1",
+    latitude: "",
+    longitude: "",
   });
 
   function update(field: string, value: string) {
@@ -102,120 +104,68 @@ export default function AddPropertyForm({
 
           <div>
             <label className={labelClass}>Title *</label>
-            <input
-              type="text"
-              value={form.title}
-              onChange={(e) => update("title", e.target.value)}
-              placeholder="Desert Retreat in Tozeur"
-              className={inputClass}
-            />
+            <input type="text" value={form.title} onChange={(e) => update("title", e.target.value)} placeholder="Desert Retreat in Tozeur" className={inputClass} />
           </div>
 
           <div>
             <label className={labelClass}>Description</label>
-            <textarea
-              value={form.description}
-              onChange={(e) => update("description", e.target.value)}
-              placeholder="A beautiful property..."
-              rows={3}
-              className={`${inputClass} resize-none`}
-            />
+            <textarea value={form.description} onChange={(e) => update("description", e.target.value)} placeholder="A beautiful property..." rows={3} className={`${inputClass} resize-none`} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>City *</label>
-              <input
-                type="text"
-                value={form.city}
-                onChange={(e) => update("city", e.target.value)}
-                placeholder="Tozeur"
-                className={inputClass}
-              />
+              <input type="text" value={form.city} onChange={(e) => update("city", e.target.value)} placeholder="Tozeur" className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Country *</label>
-              <input
-                type="text"
-                value={form.country}
-                onChange={(e) => update("country", e.target.value)}
-                placeholder="Tunisia"
-                className={inputClass}
-              />
+              <input type="text" value={form.country} onChange={(e) => update("country", e.target.value)} placeholder="Tunisia" className={inputClass} />
             </div>
           </div>
 
           <div>
             <label className={labelClass}>Address</label>
-            <input
-              type="text"
-              value={form.address}
-              onChange={(e) => update("address", e.target.value)}
-              placeholder="123 Main Street"
-              className={inputClass}
-            />
+            <input type="text" value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="123 Main Street" className={inputClass} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Price/Night ($) *</label>
-              <input
-                type="number"
-                value={form.pricePerNight}
-                onChange={(e) => update("pricePerNight", e.target.value)}
-                placeholder="90"
-                min="1"
-                className={inputClass}
-              />
+              <label className={labelClass}>Price/Night (TND) *</label>
+              <input type="number" value={form.pricePerNight} onChange={(e) => update("pricePerNight", e.target.value)} placeholder="90" min="1" className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Max Guests</label>
-              <input
-                type="number"
-                value={form.maxGuests}
-                onChange={(e) => update("maxGuests", e.target.value)}
-                min="1"
-                className={inputClass}
-              />
+              <input type="number" value={form.maxGuests} onChange={(e) => update("maxGuests", e.target.value)} min="1" className={inputClass} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelClass}>Bedrooms</label>
-              <input
-                type="number"
-                value={form.bedrooms}
-                onChange={(e) => update("bedrooms", e.target.value)}
-                min="1"
-                className={inputClass}
-              />
+              <input type="number" value={form.bedrooms} onChange={(e) => update("bedrooms", e.target.value)} min="1" className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Bathrooms</label>
-              <input
-                type="number"
-                value={form.bathrooms}
-                onChange={(e) => update("bathrooms", e.target.value)}
-                min="1"
-                className={inputClass}
-              />
+              <input type="number" value={form.bathrooms} onChange={(e) => update("bathrooms", e.target.value)} min="1" className={inputClass} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Latitude</label>
+              <input type="number" step="any" value={form.latitude} onChange={(e) => update("latitude", e.target.value)} placeholder="36.8065" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Longitude</label>
+              <input type="number" step="any" value={form.longitude} onChange={(e) => update("longitude", e.target.value)} placeholder="10.1815" className={inputClass} />
             </div>
           </div>
 
           <div className="flex gap-3 pt-3 pb-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2.5 text-[13px] font-semibold font-body text-[#1A3654]/40 hover:text-[#1A3654]/70 rounded-xl border border-[#1A3654]/10 hover:border-[#1A3654]/20 cursor-pointer transition-colors"
-            >
+            <button type="button" onClick={onClose} className="flex-1 py-2.5 text-[13px] font-semibold font-body text-[#1A3654]/40 hover:text-[#1A3654]/70 rounded-xl border border-[#1A3654]/10 hover:border-[#1A3654]/20 cursor-pointer transition-colors">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 py-2.5 text-[13px] font-bold font-body text-white bg-[#2B5EA7] hover:bg-[#1A3654] rounded-xl cursor-pointer transition-colors disabled:opacity-50"
-            >
+            <button type="submit" disabled={loading} className="flex-1 py-2.5 text-[13px] font-bold font-body text-white bg-[#2B5EA7] hover:bg-[#1A3654] rounded-xl cursor-pointer transition-colors disabled:opacity-50">
               {loading ? "Creating..." : "Add Property"}
             </button>
           </div>
