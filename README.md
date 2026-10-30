@@ -2,6 +2,8 @@
 
 Full-stack hotel & apartment booking platform for the Tunisian market. Browse properties, book stays with Stripe, manage listings as an admin.
 
+🌐 **Live:** [book-it-rouge-one.vercel.app](https://book-it-rouge-one.vercel.app)
+
 ## Tech Stack
 
 - **Framework:** Next.js 15 (App Router, Server Components, API Routes)
@@ -12,7 +14,7 @@ Full-stack hotel & apartment booking platform for the Tunisian market. Browse pr
 - **Images:** Cloudinary (upload, optimization, CDN)
 - **Maps:** Leaflet + OpenStreetMap
 - **Styling:** Tailwind CSS
-- **Deployment:** Vercel
+- **Deployment:** Vercel + Neon PostgreSQL
 
 ## Features
 
@@ -52,10 +54,9 @@ npm install
 
 # Environment
 cp .env.example .env
-# Fill in: DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL,
-# GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+# Fill in: DATABASE_URL, AUTH_SECRET, AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET,
 # CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET,
-# STRIPE_SECRET_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+# STRIPE_SECRET_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, NEXTAUTH_URL
 
 # Database
 npx prisma db push
